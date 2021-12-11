@@ -1,0 +1,7 @@
+# Project
+.env
+output.json
+
+# System
+.DS_Store
+/node_modules

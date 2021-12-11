@@ -1,0 +1,14 @@
+{
+  "name": "twitter-reply-scraper",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "Greg Skriloff",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "twitter-api-v2": "^1.7.2"
+  }
+}
