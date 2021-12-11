@@ -32,7 +32,7 @@ async function getTweet(tweetId) {
 			'tweet.fields': 'author_id,conversation_id',
 		})
 		.then(async (tweet) => {
-			const addressesInReplies = []
+			let addressesInReplies = []
 			await getReplies(tweet.data[0].conversation_id, addressesInReplies, 1)
 		})
 		.catch((err) => console.log(err))
@@ -62,15 +62,16 @@ async function getReplies(conversationId, addressesInReplies, page, next) {
 			})
 
 			// Check if there are more replies to loop through
-			if (replies.data.length > 0) {
+			if (replies.data.length === 10) {
 				// Pause for 15 mins before rate limit is reached
 				if (page % 180 === 0 && page !== 0) {
 					console.log(`${addressesInReplies.length} addresses found so far. Pausing for 15 mins to avoid rate limit...`)
-					await new Promise(resolve => setTimeout(resolve, 15 * 60 * 1000));
+					await new Promise(resolve => setTimeout(resolve, 15 * 60 * 1000))
 				}
 				await getReplies(conversationId, addressesInReplies, page + 1, replies.meta.next_token)
 			} else {
-				// Output addressesInReplies array to file output.json
+				// Remove duplicates addresses
+				addressesInReplies = [...new Set(addressesInReplies)]
 				const fs = require('fs')
 				fs.writeFile('output.json', JSON.stringify(addressesInReplies), (err) => {
 					if (err) throw err
