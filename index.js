@@ -32,14 +32,16 @@ async function getTweet(tweetId) {
 			'tweet.fields': 'author_id,conversation_id',
 		})
 		.then(async (tweet) => {
-			let addressesInReplies = []
-			await getReplies(tweet.data[0].conversation_id, addressesInReplies, 1)
+			let ensNames = []
+			let ethAddresses = []
+			let allAddresses = []
+			await getReplies(tweet.data[0].conversation_id, ensNames, ethAddresses, allAddresses, 1)
 		})
 		.catch((err) => console.log(err))
 }
 	
 // Get replies to tweet with conversation id (1800 replies/15 minutes rate limit)
-async function getReplies(conversationId, addressesInReplies, page, next) {
+async function getReplies(conversationId, ensNames, ethAddresses, allAddresses, page, next) {
 	await client.v2
 		.get('tweets/search/recent', {
 			'query': `conversation_id: ${conversationId}`,
@@ -52,12 +54,14 @@ async function getReplies(conversationId, addressesInReplies, page, next) {
 				const ethAddress = reply.text.match(ethAddressRegex)
 
 				if (ethAddress) {
-					addressesInReplies.push(ethAddress[0])
+					ethAddresses.push(ethAddress[0])
+					allAddresses.push(ethAddress[0])
 				} else if (reply.text.toLowerCase().match(/.+?(?=\.eth)/)) {
 					// If there's no ETH address, check for ENS name
 					const wordsInTweet = reply.text.toLowerCase().split(/\s|\\n/)
 					const ensName = wordsInTweet.find(word => word.includes('.eth'))
-					addressesInReplies.push(ensName)
+					ensNames.push(ensName)
+					allAddresses.push(ensName)
 				}
 			})
 
@@ -65,17 +69,35 @@ async function getReplies(conversationId, addressesInReplies, page, next) {
 			if (replies.data.length === 10) {
 				// Pause for 15 mins before rate limit is reached
 				if (page % 180 === 0 && page !== 0) {
-					console.log(`${addressesInReplies.length} addresses found so far. Pausing for 15 mins to avoid rate limit...`)
+					console.log(`${allAddresses.length} addresses found so far. Pausing for 15 mins to avoid rate limit...`)
 					await new Promise(resolve => setTimeout(resolve, 15 * 60 * 1000))
 				}
-				await getReplies(conversationId, addressesInReplies, page + 1, replies.meta.next_token)
+				await getReplies(conversationId, ensNames, ethAddresses, allAddresses, page + 1, replies.meta.next_token)
 			} else {
 				// Remove duplicates addresses
-				addressesInReplies = [...new Set(addressesInReplies)]
+				ensNames = [...new Set(ensNames)]
+				ethAddresses = [...new Set(ethAddresses)]
+				allAddresses = [...new Set(allAddresses)]
 				const fs = require('fs')
-				fs.writeFile('output.json', JSON.stringify(addressesInReplies), (err) => {
+
+				// Make 'output' directory if it doesn't exist
+				if (!fs.existsSync('./output')) {
+					fs.mkdirSync('./output')
+				}
+
+				fs.writeFile('./output/ensNames.json', JSON.stringify(ensNames), (err) => {
 					if (err) throw err
-					console.log(`The output.json file has been saved with ${addressesInReplies.length} addresses!`)
+					console.log(`${ensNames.length} ENS names saved to output/ensNames.json`)
+				})
+
+				fs.writeFile('./output/ethAddresses.json', JSON.stringify(ethAddresses), (err) => {
+					if (err) throw err
+					console.log(`${ethAddresses.length} ETH addresses saved to output/ethAddresses.json`)
+				})
+
+				fs.writeFile('./output/allAddresses.json', JSON.stringify(allAddresses), (err) => {
+					if (err) throw err
+					console.log(`${allAddresses.length} total addresses saved to output/allAddresses.json`)
 				})
 			}
 		})

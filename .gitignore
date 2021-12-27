@@ -1,6 +1,6 @@
 # Project
 .env
-output.json
+/output
 
 # System
 .DS_Store
