@@ -48,6 +48,10 @@ async function getReplies(conversationId, ensNames, ethAddresses, allAddresses, 
 			'next_token': next,
 		})
 		.then(async (replies) => {
+			if (replies.meta.result_count === 0) {
+				return console.log ('No replies found in the last 7 days')
+			}
+
 			replies.data.forEach((reply) => {
 				// Split reply text by regex to see if it includes a 42 character address
 				const ethAddressRegex = /0x[a-fA-F0-9]{40}/
