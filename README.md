@@ -1,8 +1,6 @@
 # Twitter Reply Scraper
 
-Get Ethereum addresses and ENS (.eth) names from Twitter replies.
-
-Example of where this can be useful: https://twitter.com/jacksondame/status/1469489930426621958
+Get the ID of all Twitter accounts that replied to a specific tweet.
 
 ## How to use
 1. Install dependencies with `npm install`
