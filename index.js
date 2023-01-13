@@ -14,10 +14,13 @@ const client = new TwitterApi({
 
 // Authenticate client
 ;(async () => {
-  await client.appLogin().catch((err) => {
-    console.log(err.data.errors)
-    process.exit()
-  })
+  await client
+    .appLogin()
+    .then(() => console.log('Client authenticated'))
+    .catch((err) => {
+      console.log(err.data.errors)
+      process.exit()
+    })
 
   const tweetId = tweetUrl.split('status/')[1]
   getTweet(tweetId)
@@ -84,11 +87,13 @@ async function getReplies(
       // Check if there are more replies to loop through
       if (replies.data.length === 10) {
         // Pause for 15 mins before rate limit is reached
-        if (page % 180 === 0 && page !== 0) {
+        if (page % 160 === 0 && page !== 0) {
           console.log(
             `${allAddresses.length} addresses found so far. Pausing for 15 mins to avoid rate limit...`
           )
           await new Promise((resolve) => setTimeout(resolve, 15 * 60 * 1000))
+        } else {
+          console.log(`${allAddresses.length} addresses found`)
         }
         await getReplies(
           conversationId,
