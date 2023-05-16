@@ -13,6 +13,6 @@ Example of where this can be useful: https://twitter.com/BoredElonMusk/status/16
 
 ## Things to note
 
-- The Twitter API has a rate limit of 180 requests per 15-minute window and shows 10 replies per page. We'll play it safe and do 160 requests, so after pagination that comes to 1600 replies scraped until the script will sleep for 15 minutes.
-- If the specified tweet has less than 1600 replies, this should take less than a minute.
+- The Twitter API has a rate limit of 180 requests per 15-minute window and shows 100 replies per page. We'll play it safe and do 160 requests, so after pagination that comes to 16,000 replies scraped until the script will sleep for 15 minutes.
+- If the specified tweet has less than 16,000 replies, this should take less than a minute.
 - The Twitter API will only return replies from the last 7 days.

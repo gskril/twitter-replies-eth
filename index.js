@@ -61,6 +61,7 @@ async function getReplies(
     .get('tweets/search/recent', {
       query: `conversation_id: ${conversationId}`,
       next_token: next,
+      max_results: 100,
     })
     .then(async (replies) => {
       if (replies.meta.result_count === 0) {
@@ -85,7 +86,7 @@ async function getReplies(
       })
 
       // Check if there are more replies to loop through
-      if (replies.data.length === 10) {
+      if (replies.meta.result_count === 100) {
         // Pause for 15 mins before rate limit is reached
         if (page % 160 === 0 && page !== 0) {
           console.log(
